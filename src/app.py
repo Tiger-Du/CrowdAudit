@@ -1,4 +1,5 @@
 from datetime import datetime
+import os
 import re
 import time
 
@@ -7,16 +8,15 @@ import google.generativeai as genai
 from groq import Groq
 import numpy as np
 import pandas as pd
-import sqlalchemy
 import streamlit as st
 
 ###############################################################################
 
 ### API Keys and Clients
 
-GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
-COHERE_API_KEY = st.secrets["COHERE_API_KEY"]
-GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
+GOOGLE_API_KEY = os.environ["GOOGLE_API_KEY"]
+COHERE_API_KEY = os.environ["COHERE_API_KEY"]
+GROQ_API_KEY = os.environ["GROQ_API_KEY"]
 
 ###############################################################################
 
