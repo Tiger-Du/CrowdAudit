@@ -1,24 +1,34 @@
 from datetime import datetime
-import os
 import re
 import time
 
 import cohere
 import google.generativeai as genai
 from groq import Groq
+from openai import OpenAI
+
+import plotly.express as px
 import numpy as np
 import pandas as pd
 import streamlit as st
 
+# Streamlit Configuration
+st.set_page_config(page_title="CrowdAudit: Evaluate LLMs",
+                   page_icon="favicon.ico",
+                   layout="wide")
+
 ###############################################################################
 
-### API Keys and Clients
+### API Keys
 
 GOOGLE_API_KEY = os.environ["GOOGLE_API_KEY"]
 COHERE_API_KEY = os.environ["COHERE_API_KEY"]
 GROQ_API_KEY = os.environ["GROQ_API_KEY"]
+HF_API_KEY = os.environ["HF_API_KEY"]
 
 ###############################################################################
+
+### Clients
 
 class GoogleClient():
     def __init__(self, model_ID):
@@ -41,6 +51,11 @@ class CohereClient():
 
         return response
 
+# https://console.groq.com/docs/openai
+# client = openai.OpenAI(
+#     base_url="https://api.groq.com/openai/v1",
+#     api_key=os.environ.get("GROQ_API_KEY")
+# )
 class GroqClient():
     def __init__(self, model_ID):
         self.model_ID = model_ID
@@ -67,6 +82,31 @@ class GroqClient():
 
         return response
 
+class OpenAIClient():
+    def __init__(self, model_ID):
+        self.model_ID = model_ID
+        self.client = OpenAI(
+            base_url="https://api-inference.huggingface.co/v1/",
+            api_key=HF_API_KEY
+        )
+
+    def return_response(self, prompt):
+        messages = [
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+
+        response = self.client.chat.completions.create(
+            model=self.model_ID, 
+            messages=messages, 
+            max_tokens=100,
+            stream=False
+        )
+
+        return response.choices[0].message.content
+
 ###############################################################################
 
 ## Random Selection of Two Models
@@ -87,24 +127,29 @@ def choose_models():
 
 # Initialize
 if "df" not in st.session_state:
-    models_list = [["Gemini 1.5 Flash", 'gemini-1.5-flash', "Google", GoogleClient('gemini-1.5-flash'), 'https://ai.google.dev/gemini-api/docs/models/gemini'],
-                    ["Gemma 1.1 7B (IT)", 'gemma-7b-it', "Google", GroqClient('gemma-7b-it'), 'https://huggingface.co/google/gemma-1.1-7b-it'],
-                    ["Gemma 2 9B (IT)", 'gemma2-9b-it', "Google", GroqClient('gemma2-9b-it'), 'https://huggingface.co/google/gemma-2-9b-it'],
-                    ['Llama 3 8B', 'llama3-8b-8192', 'Meta', GroqClient('llama3-8b-8192'), 'https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct'],
-                    ["Llama 3 70B", 'llama3-70b-8192', "Meta", GroqClient('llama3-70b-8192'), 'https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instruct'],
-                    ["Llama 3.1", 'llama-3.1-8b-instant', "Meta", GroqClient('llama-3.1-8b-instant'), 'https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct'], 
-                    ["Llama 3.3", 'llama-3.3-70b-versatile', "Meta", GroqClient('llama-3.3-70b-versatile'), 'https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct'],
-                    ["Command R 08 2024", 'command-r-08-2024', "Cohere", CohereClient('command-r-08-2024'), 'https://docs.cohere.com/v2/docs/command-r'],
-                    ["Command R+ 08 2024", 'command-r-plus-08-2024', "Cohere", CohereClient('command-r-plus-08-2024'), 'https://docs.cohere.com/v2/docs/command-r-plus'],
-                    ['Command', 'command', "Cohere", CohereClient('command'), 'https://docs.cohere.com/v2/docs/command-beta'],
-                    ['Command Light', 'command-light', "Cohere", CohereClient('command-light'), 'https://docs.cohere.com/v2/docs/command-beta'],
-                    ['Mixtral-8x7B', 'mixtral-8x7b-32768', 'Mistral', GroqClient('mixtral-8x7b-32768'), 'https://huggingface.co/mistralai/Mixtral-8x7B-Instruct-v0.1']]
+    models_list = [
+                    # ["Gemini 1.5 Flash", 'gemini-1.5-flash', "Google", 0, GoogleClient('gemini-1.5-flash'), 'https://ai.google.dev/gemini-api/docs/models/gemini'],
+                    # ["Gemma 1.1 7B (IT)", 'gemma-7b-it', "Google", 7, GroqClient('gemma-7b-it'), 'https://huggingface.co/google/gemma-1.1-7b-it'],
+                    ["Gemma 2 9B (IT)", 'gemma2-9b-it', "Google", 9, GroqClient('gemma2-9b-it'), 'https://huggingface.co/google/gemma-2-9b-it'],
+                    ['Llama 3 8B', 'llama3-8b-8192', 'Meta', 8, GroqClient('llama3-8b-8192'), 'https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct'],
+                    ["Llama 3 70B", 'llama3-70b-8192', "Meta", 70, GroqClient('llama3-70b-8192'), 'https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instruct'],
+                    ["Llama 3.1", 'llama-3.1-8b-instant', "Meta", 8, GroqClient('llama-3.1-8b-instant'), 'https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct'], 
+                    ["Llama 3.3", 'llama-3.3-70b-versatile', "Meta", 70, GroqClient('llama-3.3-70b-versatile'), 'https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct'],
+                    ["Command R 08 2024", 'command-r-08-2024', "Cohere", 32, CohereClient('command-r-08-2024'), 'https://docs.cohere.com/v2/docs/command-r'],
+                    ["Command R+ 08 2024", 'command-r-plus-08-2024', "Cohere", 104, CohereClient('command-r-plus-08-2024'), 'https://docs.cohere.com/v2/docs/command-r-plus'],
+                    ['Command', 'command', "Cohere", 52, CohereClient('command'), 'https://docs.cohere.com/v2/docs/command-beta'],
+                    ['Command Light', 'command-light', "Cohere", 6, CohereClient('command-light'), 'https://docs.cohere.com/v2/docs/command-beta'],
+                    ['Mixtral-8x7B', 'mixtral-8x7b-32768', 'Mistral', 47, GroqClient('mixtral-8x7b-32768'), 'https://huggingface.co/mistralai/Mixtral-8x7B-Instruct-v0.1'],
+                    ['Phi-3-Mini-4K-Instruct', 'Phi-3-mini-4k-instruct', 'Microsoft', 4, OpenAIClient('microsoft/Phi-3-mini-4k-instruct'), 'https://huggingface.co/microsoft/Phi-3-mini-4k-instruct']]
 
-    all_df = pd.DataFrame(data=models_list, columns=['Name', 'ID', 'Developer', 'Client', 'Website'])
+    all_df = pd.DataFrame(data=models_list, columns=['Name', 'ID', 'Developer', 'Parameter Count', 'Client', 'Website'])
     all_df['Votes'] = 0
+    all_df['Rounds'] = 0
+    all_df['Win Rate'] = 0
 
     st.session_state["df"] = all_df
 
+    # Initialize Model A and Model B
     st.session_state["Model A"], st.session_state["Model B"] = choose_models()
 
 model_A, model_B = st.session_state["Model A"], st.session_state["Model B"]
@@ -116,19 +161,28 @@ print(model_B)
 # Callback
 def increment(model_name: str):
     if model_name != "Tie":
-        st.session_state["df"].loc[st.session_state["df"]['Client'] == st.session_state["Model A"], 'Votes'] += 1
+        if model_name == 'A':
+            st.session_state["df"].loc[st.session_state["df"]['Client'] == st.session_state["Model A"], 'Votes'] += 1
+        elif model_name == 'B':
+            st.session_state["df"].loc[st.session_state["df"]['Client'] == st.session_state["Model B"], 'Votes'] += 1
+
+        st.session_state["df"].loc[st.session_state["df"]['Client'] == st.session_state["Model A"], 'Rounds'] += 1
+        st.session_state["df"].loc[st.session_state["df"]['Client'] == st.session_state["Model B"], 'Rounds'] += 1
 
     if model_name == "A":
-        st.toast("You voted for __Model A__! Resetting...")
+        st.toast(f"You voted for Model A!\n\nModel A: __{st.session_state["df"].loc[st.session_state["df"]['Client'] == st.session_state["Model A"], 'Name'].to_numpy()[0]}__\n\nModel B: __{st.session_state["df"].loc[st.session_state["df"]['Client'] == st.session_state["Model B"], 'Name'].to_numpy()[0]}__")
     elif model_name == "Tie":
-        st.toast("You voted for a __tie__! Resetting...")
+        st.toast("You voted for a __tie__!\n\nResetting...")
     elif model_name == "B":
-        st.toast("You voted for __Model B__! Resetting...")
+        st.toast(f"You voted for Model B!\n\nModel A: __{st.session_state["df"].loc[st.session_state["df"]['Client'] == st.session_state["Model A"], 'Name'].to_numpy()[0]}__\n\nModel B: __{st.session_state["df"].loc[st.session_state["df"]['Client'] == st.session_state["Model B"], 'Name'].to_numpy()[0]}__")
     
     # Reset
     st.session_state["Model A Response"] = ":gray[_Listening for your prompt..._]"
     st.session_state["Model B Response"] = ":gray[_Listening for your prompt..._]"
     st.session_state["Your Prompt"] = ""
+
+    # Reorder
+    st.session_state['df'].sort_values(by='Votes', axis='index', inplace=True)
 
     # Reset Models
     st.session_state["Model A"], st.session_state["Model B"] = choose_models()
@@ -140,9 +194,7 @@ def stream(response):
 
 ###############################################################################
 
-st.set_page_config(page_title="CrowdAudit: Evaluate LLMs",
-                   page_icon="favicon.ico",
-                   layout="wide")
+# Cutom CSS
 
 hide_streamlit_style = """
                 <style>
@@ -227,6 +279,7 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 ###############################################################################
 
+# Title
 st.html('<h1 style="text-align: center;">CrowdAudit</h1>')
 
 ###############################################################################
@@ -353,30 +406,53 @@ with evaluation_tab:
     ###########################################################################
 
 with explorer_tab:
-
     st.download_button(label="Export Data as CSV",
                        data=st.session_state['df'].drop('Client', axis='columns').to_csv().encode('utf-8'),
                        file_name=f"CrowdAudit_{datetime.now()}.csv",
                        mime="text/csv",
                        type='primary')
 
-    with st.expander(label="Votes", expanded=True):
+    with st.expander(label="Data", expanded=True):
         st.markdown("#### Votes for All Models")
-        st.bar_chart(data=st.session_state['df'][['Name', 'Votes']],
-                     x='Name',
-                     y='Votes',
-                     x_label="Votes",
-                     y_label="Model",
-                     horizontal=True)
+
+        data = st.session_state['df'][['Name', 'Votes', 'Parameter Count']].sort_values(by='Votes',
+                                                                                        axis='index',
+                                                                                        ascending=False)
+
+        # st.bar_chart(data=data,
+        #              x='Name',
+        #              y='Votes',
+        #              x_label="Votes",
+        #              y_label="Model",
+        #              horizontal=True)
+
+        fig = px.bar(data, x='Votes', y='Name', color='Votes', orientation='h')
+        fig.update_layout(yaxis={'categoryorder': 'total ascending'})
+
+        st.plotly_chart(fig, config=dict(displayModeBar=False))
+
+        if data['Votes'].sum() != 0:
+            st.markdown("#### Win Rates by Parameter Count")
+
+            fig = px.scatter(data,
+                            x='Parameter Count',
+                            y='Votes',
+                            color='Votes',
+                            hover_name='Name',
+                            trendline='ols')
+            fig.update_traces(marker={'size': 15})
+
+            st.plotly_chart(fig, config=dict(displayModeBar=False))
 
 ###############################################################################
 
 with models_tab:
-    st.dataframe(st.session_state['df'][['Name', 'ID', 'Developer', 'Website']],
+    st.dataframe(st.session_state['df'][['Name', 'ID', 'Parameter Count', 'Developer', 'Website']].sort_values(by='Name'),
                  hide_index=True,
                  use_container_width=True,
                  column_config={'Name': st.column_config.TextColumn(label="Name", width='medium'),
                                 'ID': st.column_config.TextColumn(label="ID", width='medium'),
+                                'Parameter Count': st.column_config.TextColumn(label="Parameter Count (B)", width='small'),
                                 'Developer': st.column_config.TextColumn(label="Developer", width='small'),
                                 "Website": st.column_config.LinkColumn(label="Website", width='medium')})
 
