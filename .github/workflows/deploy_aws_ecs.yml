@@ -9,7 +9,7 @@ env:
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
   ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
   ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
-  # ECS_TASK_DEFINITION: .aws/task-definition.json
+  ECS_TASK_DEFINITION: .aws/task-definition.json
   # ECS_TASK_DEFINITION_FAMILY: ${{ secrets.ECS_TASK_DEFINITION_FAMILY }}
   ECS_TASK_DEFINITION_ARN: ${{ secrets.ECS_TASK_DEFINITION_ARN }}
   CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
@@ -79,7 +79,8 @@ jobs:
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition-arn: ${{ env.ECS_TASK_DEFINITION_ARN }}
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          # task-definition-arn: ${{ env.ECS_TASK_DEFINITION_ARN }}
           # task-definition-family: ${{ env.ECS_TASK_DEFINITION_FAMILY }}
           container-name: ${{ env.CONTAINER_NAME }}
           # image: ${{ steps.build-image.outputs.image }}
