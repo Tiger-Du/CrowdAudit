@@ -93,7 +93,8 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           # image: ${{ steps.build-image.outputs.image }}
           # image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          # image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REGISTRY_ALIAS }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} # Alias for Public Repositories
       
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
