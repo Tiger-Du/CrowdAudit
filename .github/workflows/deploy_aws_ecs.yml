@@ -13,7 +13,8 @@ env:
   # ECS_TASK_DEFINITION_FAMILY: ${{ secrets.ECS_TASK_DEFINITION_FAMILY }}
   ECS_TASK_DEFINITION_ARN: ${{ secrets.ECS_TASK_DEFINITION_ARN }}
   CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
-
+  IMAGE_TAG: ${{ github.sha }}
+  
 jobs:
   push:
     name: Push
@@ -54,9 +55,7 @@ jobs:
           registry-type: public
 
       - name: Build, tag, and push Docker image to Amazon ECR Public
-        id: build-image
-        env:
-          IMAGE_TAG: ${{ github.sha }}
+        id: build-image          
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REGISTRY_ALIAS/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REGISTRY_ALIAS/$ECR_REPOSITORY:$IMAGE_TAG
