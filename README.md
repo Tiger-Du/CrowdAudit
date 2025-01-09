@@ -17,3 +17,24 @@ CrowdAudit supports models from many providers, including Hugging Face, Groq, an
 CrowdAudit can be deployed on AWS with Terraform.
 
 The infrastructure is an Elastic Container Service (ECS) cluster with an Auto Scaling group of EC2 instances behind an Application Load Balancer (ALB) for high availability.
+
+### Repository
+
+```code
+├── .aws                       # AWS-specific files
+│   └── task-definition.json   # Task definition for Amazon ECS
+├── .github                    # GitHub-specific files
+│   └── .workflows             # Workflow files for GitHub Actions
+│       └── deploy_aws_ecs.yml # Workflow file for deploying CrowdAudit to AWS
+├── src                        # Source code for CrowdAudit
+│   ├── .streamlit             # Streamlit-specific files
+│   │   └── config.toml        # Configuration file for Streamlit
+│   ├── app.py                 # Streamlit application
+│   └── favicon.ico            # Favicon
+├── .dockerignore              # Exclude files from the Docker build context
+├── .gitignore                 # Exclude files from git management
+├── Dockerfile                 # Script to build Docker images of CrowdAudit
+├── LICENSE                    # License for CrowdAudit
+├── README.md                  # Description of CrowdAudit
+└── requirements.txt           # List of Python packages that CrowdAudit depends on
+```
