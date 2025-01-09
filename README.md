@@ -10,3 +10,8 @@ CrowdAudit can be used as:
 - A Docker image
 - A hosted application on AWS at [crowdaudit.org](https://crowdaudit.org)
 
+### Deploying on AWS
+
+CrowdAudit can be deployed on AWS with Terraform.
+
+The infrastructure is an Elastic Container Service (ECS) cluster with an Auto Scaling group of EC2 instances behind an Application Load Balancer (ALB).
