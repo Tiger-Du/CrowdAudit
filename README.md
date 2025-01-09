@@ -10,6 +10,8 @@ CrowdAudit can be used as:
 - A Docker image
 - A hosted application on AWS at [crowdaudit.org](https://crowdaudit.org)
 
+CrowdAudit supports models from many providers, including Hugging Face, Groq, and Cohere.
+
 ### Deploying on AWS
 
 CrowdAudit can be deployed on AWS with Terraform.
