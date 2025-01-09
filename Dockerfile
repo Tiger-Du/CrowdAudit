@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
-RUN --mount type=bind,source=requirements.txt,destination=/tmp/requirements.txt \
+RUN --mount=type=bind,source=requirements.txt,destination=/tmp/requirements.txt \
     pip install -r /tmp/requirements.txt
 
 COPY ./src .
