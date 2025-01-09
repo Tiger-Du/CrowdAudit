@@ -1,4 +1,4 @@
-### CrowdAudit
+## CrowdAudit
 
 [![Deploy to Amazon Web Services](https://github.com/Tiger-Du/CrowdAudit/actions/workflows/deploy_aws_ecs.yml/badge.svg)](https://github.com/Tiger-Du/CrowdAudit/actions/workflows/deploy_aws_ecs.yml)
 
@@ -16,4 +16,4 @@ CrowdAudit supports models from many providers, including Hugging Face, Groq, an
 
 CrowdAudit can be deployed on AWS with Terraform.
 
-The infrastructure is an Elastic Container Service (ECS) cluster with an Auto Scaling group of EC2 instances behind an Application Load Balancer (ALB).
+The infrastructure is an Elastic Container Service (ECS) cluster with an Auto Scaling group of EC2 instances behind an Application Load Balancer (ALB) for high availability.
