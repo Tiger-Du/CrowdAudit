@@ -2,17 +2,16 @@
 
 FROM python:3.12-slim
 
-COPY . .
-
-WORKDIR /src
-
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install -r /requirements.txt
+RUN --mount type=bind,source=requirements.txt,destination=/tmp/requirements.txt \
+    pip install -r /tmp/requirements.txt
+
+COPY ./src .
 
 EXPOSE 8501
 
