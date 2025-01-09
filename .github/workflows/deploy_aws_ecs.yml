@@ -75,10 +75,10 @@ jobs:
 
       - name: Move cache
         run: |
-          docker build -t ${{ env.ECR_REGISTRY }}/${{ env.ECR_REGISTRY_ALIAS }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} \
+          docker buildx build --push -t ${{ env.ECR_REGISTRY }}/${{ env.ECR_REGISTRY_ALIAS }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} \
           --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
           --cache-from type=local,src=/tmp/.buildx-cache .
-          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REGISTRY_ALIAS }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          # docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REGISTRY_ALIAS }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
       
