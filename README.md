@@ -20,7 +20,7 @@ The infrastructure is an Elastic Container Service (ECS) cluster with an Auto Sc
 
 #### Architecture
 
-![](diagram.png)
+![]()
 
 ### Repository
 
