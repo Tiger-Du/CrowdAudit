@@ -18,9 +18,9 @@ CrowdAudit can be deployed on AWS with Terraform.
 
 The infrastructure is an Elastic Container Service (ECS) cluster with an Auto Scaling group of EC2 instances behind an Application Load Balancer (ALB) for high availability.
 
-### Architecture
-
-![](diagram.png)
+<details><summary><b>Architecture</b></summary>
+<img src=diagram.png>
+</details>
 
 ## Repository
 
