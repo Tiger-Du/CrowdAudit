@@ -12,17 +12,17 @@ CrowdAudit can be used as:
 
 CrowdAudit supports models from many providers, including Hugging Face, Groq, and Cohere.
 
-### Deploying on AWS
+## Deploying on AWS
 
 CrowdAudit can be deployed on AWS with Terraform.
 
 The infrastructure is an Elastic Container Service (ECS) cluster with an Auto Scaling group of EC2 instances behind an Application Load Balancer (ALB) for high availability.
 
-#### Architecture
+### Architecture
 
 ![](diagram.png)
 
-### Repository
+## Repository
 
 ```code
 ├── .aws                       # AWS-specific files
