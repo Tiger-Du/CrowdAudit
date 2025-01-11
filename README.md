@@ -4,7 +4,7 @@
 
 CrowdAudit is a full-stack application that enables evaluation of generative AI.
 
-CrowdAudit can be interacted with as:
+CrowdAudit can be used as:
 
 - A local application in Python
 - A Docker container
