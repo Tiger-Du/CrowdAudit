@@ -4,10 +4,10 @@
 
 CrowdAudit is a full-stack application that enables evaluation of generative AI.
 
-CrowdAudit can be used as:
+CrowdAudit can be interacted with as:
 
-- A Streamlit application
-- A Docker image
+- A local application in Python
+- A Docker container
 - A hosted application on AWS at [crowdaudit.org](https://crowdaudit.org)
 
 CrowdAudit supports models from many providers, including Hugging Face, Groq, and Cohere.
@@ -16,7 +16,7 @@ CrowdAudit supports models from many providers, including Hugging Face, Groq, an
 
 CrowdAudit can be deployed on AWS with Terraform.
 
-The infrastructure is an Elastic Container Service (ECS) cluster with an Auto Scaling group of EC2 instances behind an Application Load Balancer (ALB) for high availability.
+The provisioned infrastructure is an Elastic Container Service (ECS) cluster with an Auto Scaling group of EC2 instances behind an Application Load Balancer (ALB) for high availability.
 
 <details><summary><b>Architecture</b></summary>
 <img src=diagram.png>
