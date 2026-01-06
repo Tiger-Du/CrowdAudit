@@ -4,6 +4,16 @@ import { Pool } from "pg";
 
 import redis from "@/lib/redis";
 
+export type CommunityConversation = {
+  conversation_id: string;
+  assigned_lang: string;
+  first_turn_prompt: string;
+  first_turn_response_a: string;
+  first_turn_response_b: string;
+  first_turn_feedback?: string;
+  feedback_score: number;
+};
+
 // We create a single pool instance so we don't
 // create a new connection on every single click.
 const pool = new Pool({
@@ -70,7 +80,7 @@ export async function getCommunityConversations(limit = 20, cursor?: string) {
 
   if (!res.ok) throw new Error("Failed to fetch community conversations");
 
-  return res.json() as Promise<{ items: any[]; next_cursor?: string }>;
+  return res.json() as Promise<{ items: CommunityConversation[]; next_cursor?: string }>;
 }
 
 export async function updateFeedbackScore(conversationId: string, delta: number) {

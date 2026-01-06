@@ -41,20 +41,11 @@ import {
   getCommunityConversations,
   updateFeedbackScore,
   getCommunityConversationCount,
+  type CommunityConversation,
 } from "@/src/app/actions/social";
 import { ArrowBigUp, ArrowBigDown } from "lucide-react";
 
 export function Social() {
-    type CommunityConversation = {
-        conversation_id: string;
-        assigned_lang: string;
-        first_turn_prompt: string;
-        first_turn_response_a: string;
-        first_turn_response_b: string;
-        first_turn_feedback?: string;
-        feedback_score: number;
-    };
-
   const [loading, setLoading] = React.useState(true);
   const [conversations, setConversations] = React.useState<CommunityConversation[]>([]);
   //   const [conversationCount, setConversationCount] = React.useState(0)
