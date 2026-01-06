@@ -172,7 +172,7 @@ export function Social() {
                   Conv #{conv.conversation_id}
                 </span>
                 <p className="mt-2 text-sm font-medium leading-relaxed">
-                  "{conv.first_turn_prompt}"
+                  &quot;{conv.first_turn_prompt}&quot;
                 </p>
               </div>
               <div className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded">
