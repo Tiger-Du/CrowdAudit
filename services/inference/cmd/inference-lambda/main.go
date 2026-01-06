@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/awslabs/aws-lambda-go-api-proxy/httpadapter"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/awslabs/aws-lambda-go-api-proxy/httpadapter"
 
 	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/app"
 )

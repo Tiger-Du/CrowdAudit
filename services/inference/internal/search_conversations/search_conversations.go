@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"time"
-	"log"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -26,7 +26,6 @@ type ListResponse struct {
 	Items      []CommunityConversation `json:"items"`
 	NextCursor string                  `json:"next_cursor,omitempty"`
 }
-
 
 type CommunityService struct {
 	DB *pgxpool.Pool

@@ -71,7 +71,7 @@ func initOnce() {
 
 	if err := indexer.EnsurePairsIndex(ctx, osClient, pairsIndex); err != nil {
 		initErr = err
-		
+
 		return
 	}
 }
@@ -112,7 +112,9 @@ func getenv(k, def string) string {
 }
 
 func errf(msg string) error { return &simpleErr{msg: msg} }
+
 type simpleErr struct{ msg string }
+
 func (e *simpleErr) Error() string { return e.msg }
 
 func loadPGURL(ctx context.Context) (string, error) {

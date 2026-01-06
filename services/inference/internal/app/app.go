@@ -12,21 +12,21 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/opensearch-project/opensearch-go/v2"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/redis/go-redis/v9"
 	"github.com/segmentio/kafka-go"
-	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/api"
 	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/dispatcher"
+	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/infra/dburl"
 	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/infra/redisx"
 	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/obs"
 	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/outbox"
 	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/providers"
 	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/ratelimit"
 	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/search"
-	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/voting"
-	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/infra/dburl"
 	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/search_conversations"
+	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/voting"
 )
 
 // In Lambda, you should set ENABLE_OUTBOX_PUBLISHER=false so you don’t start the background goroutine.
@@ -37,7 +37,7 @@ import (
 // For Lambda you might still keep it, but it won’t be scraped. Either way, register-once is fine.
 
 type Config struct {
-	EnableInfer bool
+	EnableInfer   bool
 	EnableDB      bool
 	DatabaseURL   string
 	RedisURL      string
@@ -64,7 +64,7 @@ func LoadConfigFromEnv() (Config, error) {
 	}
 
 	cfg := Config{
-		EnableInfer: os.Getenv("ENABLE_INFER") != "false",
+		EnableInfer:   os.Getenv("ENABLE_INFER") != "false",
 		EnableDB:      os.Getenv("ENABLE_DB") != "false",
 		DatabaseURL:   dbURL,
 		RedisURL:      os.Getenv("REDIS_URL"),
@@ -98,8 +98,8 @@ func LoadConfigFromEnv() (Config, error) {
 }
 
 type Built struct {
-	Handler   http.Handler
-	Shutdown  func(context.Context)
+	Handler  http.Handler
+	Shutdown func(context.Context)
 }
 
 func Build(ctx context.Context, cfg Config) (*Built, error) {
@@ -126,7 +126,9 @@ func Build(ctx context.Context, cfg Config) (*Built, error) {
 	if cfg.EnableRedis {
 		rdb, err = redisx.NewClientFromURL(cfg.RedisURL)
 		if err != nil {
-			if dbpool != nil { dbpool.Close() }
+			if dbpool != nil {
+				dbpool.Close()
+			}
 			return nil, err
 		}
 	}
@@ -171,10 +173,18 @@ func Build(ctx context.Context, cfg Config) (*Built, error) {
 			Transport: tr,
 		})
 		if err != nil {
-			if publisherCancel != nil { publisherCancel() }
-			if writer != nil { _ = writer.Close() }
-			if rdb != nil { _ = rdb.Close() }
-			if dbpool != nil { dbpool.Close() }
+			if publisherCancel != nil {
+				publisherCancel()
+			}
+			if writer != nil {
+				_ = writer.Close()
+			}
+			if rdb != nil {
+				_ = rdb.Close()
+			}
+			if dbpool != nil {
+				dbpool.Close()
+			}
 			return nil, err
 		}
 		searchSvc = search.NewService(osClient, "pairs_v1")
@@ -184,7 +194,7 @@ func Build(ctx context.Context, cfg Config) (*Built, error) {
 	if dbpool != nil {
 		community = &search_conversations.CommunityService{DB: dbpool}
 	}
-	
+
 	// --- Provider + dispatcher ---
 	var dispatchSvc *dispatcher.Server
 	if cfg.EnableInfer {
@@ -192,7 +202,7 @@ func Build(ctx context.Context, cfg Config) (*Built, error) {
 		provider := providers.OpenRouterProvider(httpClient) // needs key
 		dispatchSvc = dispatcher.New(cfg.QueueSize, cfg.WorkerCount, provider)
 	}
-	
+
 	// --- Voting ---
 	var voteSvc *voting.Service
 	if dbpool != nil {
@@ -238,7 +248,9 @@ func Build(ctx context.Context, cfg Config) (*Built, error) {
 		if rdb != nil {
 			_ = rdb.Close()
 		}
-		if dbpool != nil { dbpool.Close() }
+		if dbpool != nil {
+			dbpool.Close()
+		}
 	}
 
 	return &Built{Handler: handler, Shutdown: shutdown}, nil

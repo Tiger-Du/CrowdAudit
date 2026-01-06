@@ -310,7 +310,7 @@ build-lambdas: build-inference-lambda build-db-api-lambda build-indexer-lambda b
 
 .PHONY: tf-apply-serverless-dev
 tf-apply-serverless-dev: build-lambdas
-# 	export VERCEL_API_TOKEN=***REMOVED***;
+# 	export VERCEL_API_TOKEN=uJZzHV6EICmo07NqrhXtchdI;
 # 	export OPENROUTER_API_KEY=$$OPENROUTER_API_KEY;
 	cd platform/terraform/envs/dev/serverless && \
 		terraform init && \

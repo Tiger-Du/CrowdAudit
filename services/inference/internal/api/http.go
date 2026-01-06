@@ -53,7 +53,7 @@ type HTTP struct {
 	requestTimeout time.Duration
 	Search         *search.Service
 
-	inferMW func(http.Handler) http.Handler // optional
+	inferMW   func(http.Handler) http.Handler // optional
 	Community *search_conversations.CommunityService
 }
 
@@ -146,7 +146,7 @@ func (h *HTTP) Routes() http.Handler {
 	return mux
 }
 
-/////////////////////////////////////////////////////////////////////////////// 
+///////////////////////////////////////////////////////////////////////////////
 
 // Handlers
 

@@ -20,6 +20,7 @@ import (
 
 	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/api"
 	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/dispatcher"
+	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/infra/dburl"
 	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/infra/redisx"
 	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/obs"
 	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/outbox"
@@ -27,7 +28,6 @@ import (
 	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/ratelimit"
 	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/search"
 	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/voting"
-	"github.com/Tiger-Du/CrowdAudit/services/inference/internal/infra/dburl"
 )
 
 // Config holds all environment-based configuration

@@ -34,8 +34,8 @@ var (
 	once    sync.Once
 	initErr error
 
-	pg      *pgxpool.Pool
-	sqsCli  *sqs.Client
+	pg       *pgxpool.Pool
+	sqsCli   *sqs.Client
 	queueURL string
 
 	batchSize int
