@@ -1,0 +1,119 @@
+name: CD
+
+on:
+  push:
+    # branches: [ "main" ]
+
+permissions:
+  id-token: write     # for AWS OIDC
+  contents: write     # to commit deploy changes back to repo
+
+concurrency:
+  group: cd-main
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-1
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  ECR_REPO_WEB: crowdaudit-web
+  ECR_REPO_API: crowdaudit-inference-api
+  ECR_REPO_INDEXER: crowdaudit-indexer
+
+  # Where the Argo-synced overlay lives
+  KUSTOMIZE_OVERLAY: deploy/k8s/overlays/eks/dev
+
+jobs:
+  build-push-and-update-gitops:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ---- AWS auth via OIDC (recommended) ----
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/crowdaudit-gha-oidc
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Compute image tags
+        id: vars
+        run: |
+          echo "sha=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+          echo "short_sha=${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
+          echo "registry=${{ steps.ecr.outputs.registry }}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # ---- Build & push: web ----
+      - name: Build & push web
+        uses: docker/build-push-action@v6
+        with:
+          context: apps/web
+          file: apps/web/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.vars.outputs.registry }}/${{ env.ECR_REPO_WEB }}:${{ steps.vars.outputs.short_sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ---- Build & push: inference-api ----
+      - name: Build & push inference-api
+        uses: docker/build-push-action@v6
+        with:
+          context: services/inference
+          file: services/inference/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.vars.outputs.registry }}/${{ env.ECR_REPO_API }}:${{ steps.vars.outputs.short_sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ---- Build & push: indexer ----
+      - name: Build & push indexer
+        uses: docker/build-push-action@v6
+        with:
+          context: services/inference
+          file: services/inference/Dockerfile.indexer
+          push: true
+          tags: |
+            ${{ steps.vars.outputs.registry }}/${{ env.ECR_REPO_INDEXER }}:${{ steps.vars.outputs.short_sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ---- Update Kustomize overlay with the new image tags ----
+      - name: Install kustomize
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP"
+          curl -sSLO https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh
+          bash install_kustomize.sh 5.7.1
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/kustomize" version
+
+      - name: Update overlay images (eks/dev)
+        working-directory: ${{ env.KUSTOMIZE_OVERLAY }}
+        run: |
+          REG="${{ steps.vars.outputs.registry }}"
+          TAG="${{ steps.vars.outputs.short_sha }}"
+
+          kustomize edit set image crowdaudit/web=${REG}/${{ env.ECR_REPO_WEB }}:${TAG}
+          kustomize edit set image crowdaudit/inference-api=${REG}/${{ env.ECR_REPO_API }}:${TAG}
+          kustomize edit set image crowdaudit/indexer=${REG}/${{ env.ECR_REPO_INDEXER }}:${TAG}
+
+          echo "Resulting kustomization.yaml:"
+          cat kustomization.yaml
+
+      - name: Commit GitOps change
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ${{ env.KUSTOMIZE_OVERLAY }}/kustomization.yaml
+          git commit -m "deploy(eks/dev): update images to ${{ steps.vars.outputs.short_sha }}" || exit 0
+          git push

@@ -1,1 +1,25 @@
-.streamlit/secrets.toml
+.env
+.env.*
+
+**/*.tfvars
+.terraform/
+terraform.tfstate
+terraform.tfstate.*
+**/terraform.tfstate
+**/terraform.tfstate.*
+**/.terraform.tfstate.lock.info
+
+node_modules/
+dist/
+
+# Lambda bootstrap binaries
+**/bootstrap
+
+# Serverless build artifacts
+deploy/aws-serverless/build/
+*.zip
+
+.local/
+
+deploy/
+platform/

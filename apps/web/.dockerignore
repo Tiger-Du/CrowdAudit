@@ -1,0 +1,25 @@
+# Dependencies (installed inside container)
+node_modules
+
+# Next.js build output
+.next
+out
+
+# Vercel / build artifacts
+.vercel
+
+# Tests / lint cache
+.eslintcache
+
+# Env files
+.env
+.env.*
+
+# Git / editor
+.git
+.gitignore
+.vscode
+.idea
+
+# OS
+.DS_Store

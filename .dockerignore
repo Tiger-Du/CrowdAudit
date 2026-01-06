@@ -1,7 +1,29 @@
-.git/
-.github/
-.dockerignore
+# Git
+.git
 .gitignore
-Dockerfile
-LICENSE
-README.md
+
+# Terraform
+**/.terraform
+**/.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.*
+*.tfvars
+backend-*.hcl
+
+# Node
+**/node_modules
+**/.next
+**/dist
+**/build
+
+# Go
+**/bin
+**/*.exe
+
+# OS / editor
+.DS_Store
+.vscode
+.idea
+
+# Logs
+**/*.log

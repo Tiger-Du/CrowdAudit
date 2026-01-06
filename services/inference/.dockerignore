@@ -1,0 +1,22 @@
+# Build output
+bin
+dist
+
+# Test artifacts
+coverage.out
+
+# Vendor (if you ever add it)
+vendor
+
+# Env files
+.env
+.env.*
+
+# Git / editor
+.git
+.gitignore
+.vscode
+.idea
+
+# OS
+.DS_Store
