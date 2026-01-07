@@ -21,5 +21,4 @@ deploy/aws-serverless/build/
 
 .local/
 
-deploy/
 platform/

@@ -1,0 +1,36 @@
+# TODO: Replace the certificate-arn with your Terraform output.
+
+# The “ssl-redirect service” is not a real Service; it’s a special AWS LBC pattern where use-annotation tells the controller to use the JSON redirect action. 
+# Kubernetes SIGs
+
+# This assumes you own dev.crowdaudit.com in Route53 and will point it at the ALB.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: crowdaudit
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+
+    # Optional but common:
+    alb.ingress.kubernetes.io/healthcheck-path: /healthz
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: inference-api
+                port:
+                  number: 8080
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web
+                port:
+                  number: 3000

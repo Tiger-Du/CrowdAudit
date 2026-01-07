@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: crowdaudit
+
+resources:
+- ../../../base
+- ingress-alb.yaml
+- externalsecrets/
+- serviceaccounts/
+- monitoring/inference-api-servicemonitor.yaml
+
+  # env wiring (endpoints, etc.)
+patches:
+- path: patches/inference-api-env.yaml
+- path: patches/indexer-env.yaml
+- path: patches/web-env.yaml
+
+# Images: CI should replace these (either by editing this file or running kustomize edit set image crowdaudit/inference-api=<ECR>:<SHA>)
+images:
+- name: crowdaudit/indexer
+  newName: 277707119818.dkr.ecr.us-east-1.amazonaws.com/crowdaudit-indexer
+  newTag: f4d858352d94
+- name: crowdaudit/inference-api
+  newName: 277707119818.dkr.ecr.us-east-1.amazonaws.com/crowdaudit-inference-api
+  newTag: f4d858352d94
+- name: crowdaudit/web
+  newName: 277707119818.dkr.ecr.us-east-1.amazonaws.com/crowdaudit-web
+  newTag: f4d858352d94

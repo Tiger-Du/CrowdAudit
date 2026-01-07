@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: indexer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: indexer
+  template:
+    metadata:
+      labels:
+        app: indexer
+    spec:
+      containers:
+        - name: indexer
+          image: crowdaudit/indexer
+          env:
+            # overlay will patch actual values
+            - name: PG_URL
+              value: ""
+            - name: KAFKA_BROKERS
+              value: ""
+            - name: KAFKA_TOPIC
+              value: "search-index"
+            - name: KAFKA_GROUP_ID
+              value: "search-indexer"
+            - name: OS_URL
+              value: ""
+            - name: OS_INSECURE
+              value: "true"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "1000m"
+              memory: "512Mi"

@@ -1,0 +1,12 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+spec:
+  template:
+    spec:
+      containers:
+        - name: web
+          env:
+            - name: NEXT_PUBLIC_API_BASE_URL
+              value: "https://YOUR_DEV_DOMAIN/api"

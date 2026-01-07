@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inference-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inference-api
+  template:
+    metadata:
+      labels:
+        app: inference-api
+    spec:
+      containers:
+        - name: inference-api
+          image: crowdaudit/inference-api
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            # overlay will patch actual values
+            - name: DATABASE_URL
+              value: ""
+            - name: KAFKA_BROKERS
+              value: ""
+            - name: ENABLE_OUTBOX_PUBLISHER
+              value: "true"
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "1000m"
+              memory: "512Mi"

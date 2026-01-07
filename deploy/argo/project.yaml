@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: crowdaudit
+  namespace: argocd
+spec:
+  description: CrowdAudit GitOps project
+
+  # Repos Argo CD is allowed to sync from
+  sourceRepos:
+    # - "https://github.com/Tiger-Du/CrowdAudit.git"
+    # If you use SSH:
+    - "git@github.com:Tiger-Du/CrowdAudit.git"
+
+  # Clusters/namespaces Argo CD is allowed to deploy to
+  destinations:
+    - namespace: crowdaudit
+      server: "https://kubernetes.default.svc"
+
+  # What kinds of resources apps in this project may manage
+  # If you don’t want Argo creating namespaces, remove the Namespace whitelist entry and create crowdaudit namespace separately.
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+    - group: "rbac.authorization.k8s.io"
+      kind: ClusterRole
+    - group: "rbac.authorization.k8s.io"
+      kind: ClusterRoleBinding
+    - group: "apiextensions.k8s.io"
+      kind: CustomResourceDefinition
+
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+
+  # Optional: tighten if you want
+  # namespaceResourceBlacklist:
+  #   - group: ""
+  #     kind: Secret

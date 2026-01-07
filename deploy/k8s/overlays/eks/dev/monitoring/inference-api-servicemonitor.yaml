@@ -1,0 +1,15 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: inference-api
+  labels:
+    release: prometheus  # must match the Prometheus Operator label / Helm install (maybe kube-prometheus-stack, prometheus-stack)
+    # If you install kube-prometheus-stack with release name prometheus, that label is right. If your release name is monitoring (common), then use release: monitoring, etc.
+spec:
+  selector:
+    matchLabels:
+      app: inference-api
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 10s

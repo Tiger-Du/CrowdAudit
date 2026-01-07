@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: crowdaudit
+
+resources:
+  - ../../base
+  - ingress.yaml
+
+secretGenerator:
+  - name: app-secrets
+    behavior: create
+    envs:
+      - ../../.env.local  # local dev overrides
+      - ../../.env        # defaults
+
+patches:
+  - path: patches/inference-api-env.yaml
+  - path: patches/indexer-env.yaml
+  - path: patches/web-env.yaml
+
+# Optional: if you want to pin tags or change images centrally
+images:
+  - name: crowdaudit/inference-api
+    newName: crowdaudit/inference-api
+    newTag: dev
+  - name: crowdaudit/indexer
+    newName: crowdaudit/indexer
+    newTag: dev
+  - name: crowdaudit/web
+    newName: crowdaudit/web
+    newTag: dev

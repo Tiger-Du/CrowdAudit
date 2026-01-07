@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crowdaudit-eks-dev
+  namespace: argocd
+spec:
+  project: crowdaudit
+
+  source:
+    repoURL: "git@github.com:Tiger-Du/CrowdAudit.git"
+    targetRevision: main
+    path: deploy/k8s/overlays/eks/dev
+
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: crowdaudit
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+      - ApplyOutOfSyncOnly=true
+
+  revisionHistoryLimit: 10
