@@ -1,6 +1,6 @@
 ## CrowdAudit
 
-[![Deploy to Amazon Web Services](https://github.com/Tiger-Du/CrowdAudit/actions/workflows/deploy_aws_ecs.yml/badge.svg)](https://github.com/Tiger-Du/CrowdAudit/actions/workflows/deploy_aws_ecs.yml)
+<!-- [![Deploy to Amazon Web Services](https://github.com/Tiger-Du/CrowdAudit/actions/workflows/deploy_aws_ecs.yml/badge.svg)](https://github.com/Tiger-Du/CrowdAudit/actions/workflows/deploy_aws_ecs.yml) -->
 
 CrowdAudit is a full-stack application that enables evaluation of generative AI.
 
